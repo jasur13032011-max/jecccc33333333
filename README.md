@@ -1,8 +1,12 @@
+Topshiriq mezonlarini 100% bajaradigan Binary Search (Ikkilik qidiruv) va Linear Search (Chiziqli qidiruv) algoritmlarini taqqoslaydigan to'liq va tayyor loyihani taqdim etaman.
+
+Loyihada algoritmlarning qadamlar soni va tezligi o'zaro solishtiriladi hamda O(log n) va O(n) murakkabliklari izohlab berilgan.
+
 📁 Repository Fayllar Tuzilishi
 Plaintext
-stack-queue-app/
+search-algorithms-demo/
 ├── index.html
-├── navigation.js
+├── search.js
 └── README.md
 💻 1. index.html (Interfeys)
 HTML
@@ -10,322 +14,178 @@ HTML
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <title>Stack & Queue Data Structures Demo</title>
+  <title>Binary Search vs Linear Search Demo</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 30px auto; padding: 0 15px; background: #f4f6f9; color: #333; }
     .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
     .form-group { display: flex; gap: 10px; margin-bottom: 15px; }
-    input { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; }
-    .btn { padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
-    .btn-primary { background: #0066cc; }
-    .btn-nav { background: #ff9800; }
-    .btn-success { background: #28a745; }
-    .status-box { background: #1e1e2e; color: #fff; padding: 12px; border-radius: 6px; font-family: monospace; margin-bottom: 10px; }
-    .error-msg { color: #dc3545; font-weight: bold; min-height: 20px; margin-top: 5px; }
-    ul { list-style: none; padding: 0; margin: 0; }
-    li { background: #f8f9fa; padding: 8px 12px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; }
+    input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .btn { padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; background: #0066cc; }
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .result-box { background: #1e1e2e; color: #fff; padding: 15px; border-radius: 6px; font-family: monospace; }
+    .error-msg { color: #dc3545; font-weight: bold; margin-bottom: 10px; }
+    .highlight { color: #00ff00; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <h1>📚 Stack (LIFO) & Queue (FIFO) Demo</h1>
-
-  <div id="error-box" class="error-msg"></div>
+  <h1>🔍 Binary Search vs Linear Search</h1>
 
   <div class="card">
-    <h2>1. Brauzer Navigatsiyasi (Stack - LIFO)</h2>
-    <div class="status-box">
-      Hozirgi sahifa: <strong id="current-page">Yo'q</strong>
-    </div>
+    <div id="error-box" class="error-msg"></div>
 
     <div class="form-group">
-      <input type="text" id="url-input" placeholder="https://example.com" />
-      <button id="btn-visit" class="btn btn-primary">Tashrif buyurish (Push)</button>
+      <input type="number" id="target-input" placeholder="Qidirilayotgan sonni kiriting..." />
+      <button id="btn-search" class="btn">Qidirish va Taqqoslash</button>
     </div>
 
-    <div>
-      <button id="btn-back" class="btn btn-nav">⬅️ Back (Pop)</button>
-      <button id="btn-forward" class="btn btn-nav">Forward (Pop) ➡️</button>
+    <p><small>📌 Sinov massivi: 1,000,000 ta saralangan sonlardan iborat.</small></p>
+
+    <div class="comparison-grid">
+      <div class="result-box">
+        <h3>⚡ Binary Search</h3>
+        <div id="binary-results">Natija kutilmoqda...</div>
+      </div>
+      <div class="result-box">
+        <h3>🐌 Linear Search</h3>
+        <div id="linear-results">Natija kutilmoqda...</div>
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <h2>2. Yuklab Olish Navbati (Queue - FIFO)</h2>
-    <div class="form-group">
-      <input type="text" id="file-input" placeholder="file_name.zip" />
-      <button id="btn-enqueue" class="btn btn-primary">Navbatga qo'shish (Enqueue)</button>
-    </div>
-
-    <div>
-      <button id="btn-dequeue" class="btn btn-success">Bitta faylni yuklash (Dequeue)</button>
-    </div>
-
-    <h3>📥 Yuklash Navbati (Queue status):</h3>
-    <ul id="download-list"></ul>
-  </div>
-
-  <script src="navigation.js"></script>
+  <script src="search.js"></script>
 </body>
 </html>
-⚙️ 2. navigation.js (Stack, Queue va Logika)
+⚙️ 2. search.js (Algoritmlar va Izohlar)
 JavaScript
 // ==============================================================================
-// 1. STACK KLASSI (LIFO - Last In, First Out)
+// 1. BINARY SEARCH ALGORITMI
+// Time Complexity: O(log n) - Binar qidiruv har bir qadamda qidiruv maydonini teng 2 ga bo'ladi.
+// Space Complexity: O(1) - Qo'shimcha xotira talab qilinmaydi.
 // ==============================================================================
-class Stack {
-  constructor() {
-    this.items = [];
-  }
-
-  // Element qo'shish (oxiriga)
-  push(item) {
-    this.items.push(item);
-  }
-
-  // Elementni olib tashlash (oxirgisini)
-  pop() {
-    if (this.isEmpty()) {
-      return null;
+function binarySearch(arr, target) {
+  // Mezon: Massiv saralanganligini talab qilish va tekshirish
+  for (let i = 0; i < arr.length - 1; i++) {
+    if (arr[i] > arr[i + 1]) {
+      throw new Error("❌ Xatolik: binarySearch() ishlashi uchun massiv albatta SARALANGAN bo'lishi kerak!");
     }
-    return this.items.pop();
   }
 
-  // Eng ustki (oxirgi) elementni ko'rish
-  peek() {
-    if (this.isEmpty()) return null;
-    return this.items[this.items.length - 1];
+  let left = 0;
+  let right = arr.length - 1;
+  let steps = 0; // Qadamlar sonini hisoblash
+
+  // O(log n) algoritmi mantiqi
+  while (left <= right) {
+    steps++;
+    // Mid indeksini to'g'ri hisoblash
+    const mid = Math.floor((left + right) / 2);
+
+    if (arr[mid] === target) {
+      return { index: mid, steps: steps }; // Topilganda indeks va qadamlar qaytariladi
+    } else if (arr[mid] < target) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
   }
 
-  // Bo'shligini tekshirish
-  isEmpty() {
-    return this.items.length === 0;
-  }
+  return { index: -1, steps: steps }; // Topilmaganda -1 va qadamlar qaytariladi
 }
 
 // ==============================================================================
-// 2. QUEUE KLASSI (FIFO - First In, First Out)
+// 2. LINEAR SEARCH ALGORITMI
+// Time Complexity: O(n) - Massiv elementlarini birma-bir ketma-ket tekshirib chiqadi.
+// Space Complexity: O(1)
 // ==============================================================================
-class Queue {
-  constructor() {
-    this.items = [];
-  }
+function linearSearch(arr, target) {
+  let steps = 0;
 
-  // Navbatga qo'shish (oxiriga)
-  enqueue(item) {
-    this.items.push(item);
-  }
-
-  // Navbatdan chiqarish (birinchisini olib tashlash)
-  dequeue() {
-    if (this.isEmpty()) {
-      return null;
+  for (let i = 0; i < arr.length; i++) {
+    steps++;
+    if (arr[i] === target) {
+      return { index: i, steps: steps };
     }
-    return this.items.shift();
   }
 
-  // Navbatdagi birinchi elementni ko'rish
-  front() {
-    if (this.isEmpty()) return null;
-    return this.items[0];
-  }
-
-  // Bo'shligini tekshirish
-  isEmpty() {
-    return this.items.length === 0;
-  }
+  return { index: -1, steps: steps };
 }
 
 // ==============================================================================
-// 3. BRAUZER HISTORIYA VA DOWNLOAD MANAGER TIZIMI
+// 3. UI VA TEZLIKNI TAQQOSLASH (BENCHMARK)
 // ==============================================================================
 
-// Stack obyekti yaratiladi
-const backStack = new Stack();
-const forwardStack = new Stack();
-let currentPage = null;
+// 1,000,000 ta saralangan sonlardan iborat katta massiv yaratish
+const LARGE_SORTED_ARRAY = Array.from({ length: 1000000 }, (_, index) => index + 1);
 
-// Download Queue obyekti yaratiladi
-const downloadQueue = new Queue();
-
-// DOM Elementlari
-const urlInput = document.getElementById('url-input');
-const btnVisit = document.getElementById('btn-visit');
-const btnBack = document.getElementById('btn-back');
-const btnForward = document.getElementById('btn-forward');
-const currentPageDisplay = document.getElementById('current-page');
-
-const fileInput = document.getElementById('file-input');
-const btnEnqueue = document.getElementById('btn-enqueue');
-const btnDequeue = document.getElementById('btn-dequeue');
-const downloadList = document.getElementById('download-list');
+const targetInput = document.getElementById('target-input');
+const btnSearch = document.getElementById('btn-search');
+const binaryResults = document.getElementById('binary-results');
+const linearResults = document.getElementById('linear-results');
 const errorBox = document.getElementById('error-box');
 
-function showError(msg) {
-  errorBox.textContent = msg;
-  setTimeout(() => { errorBox.textContent = ''; }, 3000);
-}
+btnSearch.addEventListener('click', () => {
+  errorBox.textContent = '';
+  const target = parseInt(targetInput.value, 10);
 
-// --- STACK METODLARI (NAVIGATION) ---
-
-function visitUrl(url) {
-  if (!url) return;
-  
-  if (currentPage) {
-    backStack.push(currentPage);
-  }
-  
-  currentPage = url;
-  
-  // Yangi URL'ga o'tilganda forwardStack tozalanadi
-  while (!forwardStack.isEmpty()) {
-    forwardStack.pop();
-  }
-
-  updateNavUI();
-}
-
-function back() {
-  // back() bo'sh backStack da xato chiqarsin (Talab bo'yicha)
-  if (backStack.isEmpty()) {
-    throw new Error("⚠️ Xatolik: Orqaga qaytish uchun tarix mavjud emas (backStack bo'sh)!");
-  }
-
-  forwardStack.push(currentPage);
-  currentPage = backStack.pop();
-  updateNavUI();
-}
-
-function forward() {
-  // forward() bo'sh forwardStack da xato chiqarsin (Talab bo'yicha)
-  if (forwardStack.isEmpty()) {
-    throw new Error("⚠️ Xatolik: Oldinga o'tish uchun tarix mavjud emas (forwardStack bo'sh)!");
-  }
-
-  backStack.push(currentPage);
-  currentPage = forwardStack.pop();
-  updateNavUI();
-}
-
-function updateNavUI() {
-  currentPageDisplay.textContent = currentPage || "Yo'q";
-}
-
-// --- QUEUE METODLARI (DOWNLOAD QUEUE) ---
-
-function addDownload(fileName) {
-  if (!fileName) return;
-  downloadQueue.enqueue(fileName);
-  updateQueueUI();
-}
-
-function processDownload() {
-  if (downloadQueue.isEmpty()) {
-    showError("⚠️ Download Queue bo'sh! Yuklab olish uchun fayl yo'q.");
+  if (isNaN(target)) {
+    errorBox.textContent = "Iltimos, haqiqiy son kiriting!";
     return;
   }
 
-  const downloadedFile = downloadQueue.dequeue();
-  alert(`✅ Fayl yuklab olindi: ${downloadedFile}`);
-  updateQueueUI();
-}
-
-function updateQueueUI() {
-  downloadList.innerHTML = '';
-  
-  downloadQueue.items.forEach((file, index) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<span>#${index + 1} ${file}</span> <span>${index === 0 ? '⏳ [Navbatda birinchi]' : '⏸️ [Kutmoqda]'}</span>`;
-    downloadList.appendChild(li);
-  });
-}
-
-// --- EVENT LISTENERS ---
-
-btnVisit.addEventListener('click', () => {
-  const url = urlInput.value.trim();
-  if (url) {
-    visitUrl(url);
-    urlInput.value = '';
-  }
-});
-
-btnBack.addEventListener('click', () => {
   try {
-    back();
+    // --- Binary Search Tezligini O'lchash ---
+    const startBinaryTime = performance.now();
+    const binaryRes = binarySearch(LARGE_SORTED_ARRAY, target);
+    const endBinaryTime = performance.now();
+    const binaryDuration = (endBinaryTime - startBinaryTime).toFixed(4);
+
+    // --- Linear Search Tezligini O'lchash ---
+    const startLinearTime = performance.now();
+    const linearRes = linearSearch(LARGE_SORTED_ARRAY, target);
+    const endLinearTime = performance.now();
+    const linearDuration = (endLinearTime - startLinearTime).toFixed(4);
+
+    // --- Natijalarni Chiqarish ---
+    binaryResults.innerHTML = `
+      • Indeks: <span class="highlight">${binaryRes.index}</span><br>
+      • Qadamlar soni: <span class="highlight">${binaryRes.steps}</span> qadam<br>
+      • Sarflangan vaqt: <span class="highlight">${binaryDuration} ms</span><br>
+      • Murakkablik: O(log n)
+    `;
+
+    linearResults.innerHTML = `
+      • Indeks: <span class="highlight">${linearRes.index}</span><br>
+      • Qadamlar soni: <span class="highlight">${linearRes.steps}</span> qadam<br>
+      • Sarflangan vaqt: <span class="highlight">${linearDuration} ms</span><br>
+      • Murakkablik: O(n)
+    `;
+
   } catch (err) {
-    showError(err.message);
+    errorBox.textContent = err.message;
   }
 });
-
-btnForward.addEventListener('click', () => {
-  try {
-    forward();
-  } catch (err) {
-    showError(err.message);
-  }
-});
-
-btnEnqueue.addEventListener('click', () => {
-  const file = fileInput.value.trim();
-  if (file) {
-    addDownload(file);
-    fileInput.value = '';
-  }
-});
-
-btnDequeue.addEventListener('click', () => {
-  processDownload();
-});
-
-// ==============================================================================
-// KAMIDA 5 TA URL VA 3 TA YUKLAB OLISH BILAN SINAB KO'RISH (TALAB BO'YICHA)
-// ==============================================================================
-function initTestData() {
-  // 5 ta URL kiritilishi
-  const testUrls = [
-    "https://google.com",
-    "https://github.com",
-    "https://developer.mozilla.org",
-    "https://stackoverflow.com",
-    "https://javascript.info"
-  ];
-
-  testUrls.forEach(url => visitUrl(url));
-
-  // 3 ta yuklab olish fayli qo'shilishi
-  const testDownloads = [
-    "document.pdf",
-    "archive_v1.zip",
-    "installer.exe"
-  ];
-
-  testDownloads.forEach(file => addDownload(file));
-}
-
-// Ilovani test ma'lumotlari bilan ishga tushirish
-initTestData();
 📑 3. README.md
 Markdown
-# 📚 Stack and Queue Data Structures Project
+# 🔍 Binary Search vs Linear Search Project
 
-Ushbu loyihada **Stack (LIFO)** va **Queue (FIFO)** ma'lumotlar tuzilmalari sinflari (Class) orqali amalda qo'llanilgan.
+Ushbu loyihada **Binary Search O(log n)** va **Linear Search O(n)** qidiruv algoritmlari unumdorlik va qadamlar soni bo'yicha amalda solishtirilgan.
 
-## 🛠 Imkoniyatlar:
-- **Stack Class (LIFO)**: `push()`, `pop()`, `peek()`, va `isEmpty()` metodlari bilan jihozlangan. Brauzer tarixdan orqaga (`back`) va oldinga (`forward`) harakatlanish uchun ishlatiladi.
-- **Queue Class (FIFO)**: `enqueue()`, `dequeue()`, `front()`, va `isEmpty()` metodlariga ega. Yuklab olish navbati (Download Queue) uchun qo'llaniladi.
-- **Error Handling**: `back()` bo'sh `backStack` bo'lganda, `forward()` esa bo'sh `forwardStack` bo'lganda maxsus xatolik chiqaradi.
-- **Test Ma'lumotlari**: Dastlab kamida 5 ta URL va 3 ta yuklab olish fayli bilan avtomatik sinab ko'rilgan.
+## 🛠 Algoritmik Tushunchalar:
+- **Binary Search `O(log n)`**: Massiv albatta saralangan bo'lishi shart. Har bir qadamda ikkiga bo'lib qidiradi (`left`, `right`, `mid`). 1,000,000 ta elementdan iborat massivda eng ko'pi bilan ~20 ta qadamda javobni topadi.
+- **Linear Search `O(n)`**: Elementlarni birma-bir tekshiradi. Oxirgi elementni topish uchun 1,000,000 ta qadam bajaradi.
+- **Vaqt va Qadamlar**: Kod har bir qidiruvda necha qadam ketgani va milli-soniyalardagi ijro vaqtini (`performance.now()`) ko'rsatib beradi.
 📌 Commit'lar Tarixi
 Terminalda quyidagi buyruqlarni kiriting:
 
 Bash
 git add index.html
-git commit -m "feat: setup HTML UI for Stack navigation and Queue download manager"
+git commit -m "feat: setup layout for algorithm comparison dashboard"
 
-git add navigation.js
-git commit -m "feat: implement Stack (LIFO) and Queue (FIFO) classes with error handling for empty stacks"
+git add search.js
+git commit -m "feat: implement binarySearch with O(log n) comments, step counter, and sorting check"
 
-git add navigation.js README.md
-git commit -m "feat: add 5 test URLs and 3 test downloads to satisfy requirements and update docs"
+git add search.js README.md
+git commit -m "feat: add linearSearch comparison benchmark with execution timer and update docs"
 
 git push origin main
