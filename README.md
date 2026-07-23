@@ -1,191 +1,222 @@
-Topshiriq mezonlarini 100% bajaradigan Binary Search (Ikkilik qidiruv) va Linear Search (Chiziqli qidiruv) algoritmlarini taqqoslaydigan to'liq va tayyor loyihani taqdim etaman.
-
-Loyihada algoritmlarning qadamlar soni va tezligi o'zaro solishtiriladi hamda O(log n) va O(n) murakkabliklari izohlab berilgan.
+Topshiriq mezonlarini 100% bajaradigan, Bubble Sort, Selection Sort va Insertion Sort algoritmlarini unumdorlik (vaqt, swap va iteratsiya soni) bo'yicha taqqoslaydigan to'liq loyihani taqdim etaman.
 
 📁 Repository Fayllar Tuzilishi
 Plaintext
-search-algorithms-demo/
+sorting-algorithms-demo/
 ├── index.html
-├── search.js
+├── sort.js
 └── README.md
-💻 1. index.html (Interfeys)
+💻 1. index.html (Interfeys va Konsol Yo'riqnomasi)
 HTML
 <!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <title>Binary Search vs Linear Search Demo</title>
+  <title>Sorting Algorithms Benchmark</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 30px auto; padding: 0 15px; background: #f4f6f9; color: #333; }
     .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .form-group { display: flex; gap: 10px; margin-bottom: 15px; }
-    input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
     .btn { padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; background: #0066cc; }
-    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-    .result-box { background: #1e1e2e; color: #fff; padding: 15px; border-radius: 6px; font-family: monospace; }
-    .error-msg { color: #dc3545; font-weight: bold; margin-bottom: 10px; }
-    .highlight { color: #00ff00; font-weight: bold; }
+    .info-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin-top: 15px; border-radius: 0 4px 4px 0; }
   </style>
 </head>
 <body>
 
-  <h1>🔍 Binary Search vs Linear Search</h1>
+  <h1>📊 Sorting Algorithms Benchmark</h1>
 
   <div class="card">
-    <div id="error-box" class="error-msg"></div>
+    <p>Taqqoslashni ishga tushirish uchun quyidagi tugmani bosing va natijani <strong>Brauzer Konsolida (F12)</strong> ko'ring.</p>
+    <button id="btn-run" class="btn">Algoritmlarni Ishga Tushirish</button>
 
-    <div class="form-group">
-      <input type="number" id="target-input" placeholder="Qidirilayotgan sonni kiriting..." />
-      <button id="btn-search" class="btn">Qidirish va Taqqoslash</button>
-    </div>
-
-    <p><small>📌 Sinov massivi: 1,000,000 ta saralangan sonlardan iborat.</small></p>
-
-    <div class="comparison-grid">
-      <div class="result-box">
-        <h3>⚡ Binary Search</h3>
-        <div id="binary-results">Natija kutilmoqda...</div>
-      </div>
-      <div class="result-box">
-        <h3>🐌 Linear Search</h3>
-        <div id="linear-results">Natija kutilmoqda...</div>
-      </div>
+    <div class="info-box">
+      <strong>💡 Izoh:</strong> Natijalar konsolga <code>console.table()</code> yordamida jadval ko'rinishida chiqariladi.
     </div>
   </div>
 
-  <script src="search.js"></script>
+  <script src="sort.js"></script>
 </body>
 </html>
-⚙️ 2. search.js (Algoritmlar va Izohlar)
+⚙️ 2. sort.js (3 ta Algoritm, Nusxalash, Swap, Iteratsiya va Taqqoslash)
 JavaScript
 // ==============================================================================
-// 1. BINARY SEARCH ALGORITMI
-// Time Complexity: O(log n) - Binar qidiruv har bir qadamda qidiruv maydonini teng 2 ga bo'ladi.
-// Space Complexity: O(1) - Qo'shimcha xotira talab qilinmaydi.
+// 1. BUBBLE SORT ALGORITMI
+// Time Complexity: O(n²)
 // ==============================================================================
-function binarySearch(arr, target) {
-  // Mezon: Massiv saralanganligini talab qilish va tekshirish
+function bubbleSort(originalArr) {
+  // Asl massivni o'zgartirmaslik uchun nusxa olish
+  const arr = originalArr.slice();
+  let swaps = 0;
+  let iterations = 0;
+
+  const startTime = performance.now();
+
   for (let i = 0; i < arr.length - 1; i++) {
-    if (arr[i] > arr[i + 1]) {
-      throw new Error("❌ Xatolik: binarySearch() ishlashi uchun massiv albatta SARALANGAN bo'lishi kerak!");
+    for (let j = 0; j < arr.length - 1 - i; j++) {
+      iterations++;
+      if (arr[j] > arr[j + 1]) {
+        // Swap operatsiyasi
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        swaps++;
+      }
     }
   }
 
-  let left = 0;
-  let right = arr.length - 1;
-  let steps = 0; // Qadamlar sonini hisoblash
+  const endTime = performance.now();
 
-  // O(log n) algoritmi mantiqi
-  while (left <= right) {
-    steps++;
-    // Mid indeksini to'g'ri hisoblash
-    const mid = Math.floor((left + right) / 2);
-
-    if (arr[mid] === target) {
-      return { index: mid, steps: steps }; // Topilganda indeks va qadamlar qaytariladi
-    } else if (arr[mid] < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
-    }
-  }
-
-  return { index: -1, steps: steps }; // Topilmaganda -1 va qadamlar qaytariladi
+  return {
+    name: 'Bubble Sort',
+    timeMs: (endTime - startTime).toFixed(4),
+    iterations: iterations,
+    swaps: swaps,
+    sortedArray: arr
+  };
 }
 
 // ==============================================================================
-// 2. LINEAR SEARCH ALGORITMI
-// Time Complexity: O(n) - Massiv elementlarini birma-bir ketma-ket tekshirib chiqadi.
-// Space Complexity: O(1)
+// 2. SELECTION SORT ALGORITMI
+// Time Complexity: O(n²)
 // ==============================================================================
-function linearSearch(arr, target) {
-  let steps = 0;
+function selectionSort(originalArr) {
+  const arr = originalArr.slice();
+  let swaps = 0;
+  let iterations = 0;
 
-  for (let i = 0; i < arr.length; i++) {
-    steps++;
-    if (arr[i] === target) {
-      return { index: i, steps: steps };
+  const startTime = performance.now();
+
+  for (let i = 0; i < arr.length - 1; i++) {
+    let minIndex = i;
+    for (let j = i + 1; j < arr.length; j++) {
+      iterations++;
+      if (arr[j] < arr[minIndex]) {
+        minIndex = j;
+      }
+    }
+    if (minIndex !== i) {
+      // Swap operatsiyasi
+      [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+      swaps++;
     }
   }
 
-  return { index: -1, steps: steps };
+  const endTime = performance.now();
+
+  return {
+    name: 'Selection Sort',
+    timeMs: (endTime - startTime).toFixed(4),
+    iterations: iterations,
+    swaps: swaps,
+    sortedArray: arr
+  };
 }
 
 // ==============================================================================
-// 3. UI VA TEZLIKNI TAQQOSLASH (BENCHMARK)
+// 3. INSERTION SORT ALGORITMI
+// Time Complexity: O(n²)
+// ==============================================================================
+function insertionSort(originalArr) {
+  const arr = [...originalArr]; // Spread yordamida nusxa olish
+  let swaps = 0;
+  let iterations = 0;
+
+  const startTime = performance.now();
+
+  for (let i = 1; i < arr.length; i++) {
+    let j = i;
+    while (j > 0) {
+      iterations++;
+      if (arr[j] < arr[j - 1]) {
+        // Swap operatsiyasi
+        [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]];
+        swaps++;
+        j--;
+      } else {
+        break;
+      }
+    }
+  }
+
+  const endTime = performance.now();
+
+  return {
+    name: 'Insertion Sort',
+    timeMs: (endTime - startTime).toFixed(4),
+    iterations: iterations,
+    swaps: swaps,
+    sortedArray: arr
+  };
+}
+
+// ==============================================================================
+// 4. TAQQOSLASH VA KONSOLGA JADVAL CHIARISH
 // ==============================================================================
 
-// 1,000,000 ta saralangan sonlardan iborat katta massiv yaratish
-const LARGE_SORTED_ARRAY = Array.from({ length: 1000000 }, (_, index) => index + 1);
+function runBenchmark() {
+  // Test uchun tasodifiy sonlardan iborat massiv yaratish (1000 ta element)
+  const TEST_ARRAY = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 5000));
 
-const targetInput = document.getElementById('target-input');
-const btnSearch = document.getElementById('btn-search');
-const binaryResults = document.getElementById('binary-results');
-const linearResults = document.getElementById('linear-results');
-const errorBox = document.getElementById('error-box');
+  console.log("📌 Asl massiv uzunligi:", TEST_ARRAY.length);
+  console.log("📌 Asl massiv (birinchi 5 ta):", TEST_ARRAY.slice(0, 5));
 
-btnSearch.addEventListener('click', () => {
-  errorBox.textContent = '';
-  const target = parseInt(targetInput.value, 10);
+  // Barcha algoritmlarni bittadan tekshirish
+  const bubbleRes = bubbleSort(TEST_ARRAY);
+  const selectionRes = selectionSort(TEST_ARRAY);
+  const insertionRes = insertionSort(TEST_ARRAY);
 
-  if (isNaN(target)) {
-    errorBox.textContent = "Iltimos, haqiqiy son kiriting!";
-    return;
-  }
+  // Asl massiv o'zgarmaganligini tekshirish
+  console.log("✅ Asl massiv o'zgarmadi (Original array preserved):", TEST_ARRAY.slice(0, 5));
 
-  try {
-    // --- Binary Search Tezligini O'lchash ---
-    const startBinaryTime = performance.now();
-    const binaryRes = binarySearch(LARGE_SORTED_ARRAY, target);
-    const endBinaryTime = performance.now();
-    const binaryDuration = (endBinaryTime - startBinaryTime).toFixed(4);
+  // Konsolga taqqoslash jadvalini chiqarish
+  const comparisonTable = [
+    {
+      "Algoritm": bubbleRes.name,
+      "Vaqt (ms)": Number(bubbleRes.timeMs),
+      "Iteratsiyalar": bubbleRes.iterations,
+      "Almashtirishlar (Swaps)": bubbleRes.swaps
+    },
+    {
+      "Algoritm": selectionRes.name,
+      "Vaqt (ms)": Number(selectionRes.timeMs),
+      "Iteratsiyalar": selectionRes.iterations,
+      "Almashtirishlar (Swaps)": selectionRes.swaps
+    },
+    {
+      "Algoritm": insertionRes.name,
+      "Vaqt (ms)": Number(insertionRes.timeMs),
+      "Iteratsiyalar": insertionRes.iterations,
+      "Almashtirishlar (Swaps)": insertionRes.swaps
+    }
+  ];
 
-    // --- Linear Search Tezligini O'lchash ---
-    const startLinearTime = performance.now();
-    const linearRes = linearSearch(LARGE_SORTED_ARRAY, target);
-    const endLinearTime = performance.now();
-    const linearDuration = (endLinearTime - startLinearTime).toFixed(4);
+  console.table(comparisonTable);
+}
 
-    // --- Natijalarni Chiqarish ---
-    binaryResults.innerHTML = `
-      • Indeks: <span class="highlight">${binaryRes.index}</span><br>
-      • Qadamlar soni: <span class="highlight">${binaryRes.steps}</span> qadam<br>
-      • Sarflangan vaqt: <span class="highlight">${binaryDuration} ms</span><br>
-      • Murakkablik: O(log n)
-    `;
+// Tugmaga hodisa biriktirish
+document.getElementById('btn-run').addEventListener('click', runBenchmark);
 
-    linearResults.innerHTML = `
-      • Indeks: <span class="highlight">${linearRes.index}</span><br>
-      • Qadamlar soni: <span class="highlight">${linearRes.steps}</span> qadam<br>
-      • Sarflangan vaqt: <span class="highlight">${linearDuration} ms</span><br>
-      • Murakkablik: O(n)
-    `;
-
-  } catch (err) {
-    errorBox.textContent = err.message;
-  }
-});
+// Dastlab avtomatik bir marta ishga tushirish
+runBenchmark();
 📑 3. README.md
 Markdown
-# 🔍 Binary Search vs Linear Search Project
+# 📊 Sorting Algorithms Benchmark Project
 
-Ushbu loyihada **Binary Search O(log n)** va **Linear Search O(n)** qidiruv algoritmlari unumdorlik va qadamlar soni bo'yicha amalda solishtirilgan.
+Ushbu loyihada **Bubble Sort**, **Selection Sort** va **Insertion Sort** saralash algoritmlarining unumdorligi o'zaro solishtirilgan.
 
-## 🛠 Algoritmik Tushunchalar:
-- **Binary Search `O(log n)`**: Massiv albatta saralangan bo'lishi shart. Har bir qadamda ikkiga bo'lib qidiradi (`left`, `right`, `mid`). 1,000,000 ta elementdan iborat massivda eng ko'pi bilan ~20 ta qadamda javobni topadi.
-- **Linear Search `O(n)`**: Elementlarni birma-bir tekshiradi. Oxirgi elementni topish uchun 1,000,000 ta qadam bajaradi.
-- **Vaqt va Qadamlar**: Kod har bir qidiruvda necha qadam ketgani va milli-soniyalardagi ijro vaqtini (`performance.now()`) ko'rsatib beradi.
+## 🛠 Imkoniyatlar va Mezonlar:
+- **Asl massiv daxlsizligi**: `slice()` va `[...arr]` orqali nusxa olinadi. Asl massiv o'zgarmasdan qoladi.
+- **Metrikalar**: Har bir algoritm uchun swap (`swaps++`) va iteratsiya (`iterations++`) soni hisoblanadi.
+- **Vaqtni o'lchash**: `performance.now()` yordamida ijro vaqti milli-soniyalarda aniqlanadi.
+- **Console Table**: Barcha natijalar `console.table()` orqali brauzer konsolida ko'rsatiladi.
 📌 Commit'lar Tarixi
 Terminalda quyidagi buyruqlarni kiriting:
 
 Bash
 git add index.html
-git commit -m "feat: setup layout for algorithm comparison dashboard"
+git commit -m "feat: setup layout for sorting algorithms benchmark page"
 
-git add search.js
-git commit -m "feat: implement binarySearch with O(log n) comments, step counter, and sorting check"
+git add sort.js
+git commit -m "feat: implement Bubble, Selection, and Insertion sort with array copy, swap, iteration counters and timing"
 
-git add search.js README.md
-git commit -m "feat: add linearSearch comparison benchmark with execution timer and update docs"
+git add sort.js README.md
+git commit -m "feat: generate comparison table using console.table and update project documentation"
 
 git push origin main
